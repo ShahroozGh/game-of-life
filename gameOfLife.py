@@ -60,12 +60,12 @@ class game:
 	def checkLivingConditions(self, cellList):
 		for x in range(70):
 			for y in range(70):
-				liveNeighbours = self.checkNeighbours(x,y,cellList)
+				liveNeighbours = self.checkNeighbours(x,y,cellList) ##Problem here hebause of order, dont kill or spawn until complete check is over, just flag
 				if cellList[x][y].live is True:
 					
 					if liveNeighbours < 2:
 						#Kill Cell
-						self.addOrKillCell(False,x,y,cellList)
+						self.addOrKillCell(False,x,y,cellList) #Dont do this yet, just flag
 					elif liveNeighbours > 3:
 						#Kill Cell
 						self.addOrKillCell(False,x,y,cellList)
