@@ -35,8 +35,9 @@ class game:
 
 	def gameLoop(self, cellList):
 		self.checkLivingConditions(cellList)
+		self.nextGeneration(cellList)
 		self.paint(cellList)
-		self.root.after(10000, self.gameLoop, cellList)
+		self.root.after(5000, self.gameLoop, cellList)
 
 	def paint(self,cellList):
 		self.canvas.delete(tk.ALL)
@@ -57,6 +58,7 @@ class game:
 	def addOrKillCell(self,live,x,y , cellList):
 		cellList[x][y].live = live
 
+	#Iterates through all tiles and determines which should live or die 
 	def checkLivingConditions(self, cellList):
 		for x in range(70):
 			for y in range(70):
@@ -65,22 +67,44 @@ class game:
 					
 					if liveNeighbours < 2:
 						#Kill Cell
-						self.addOrKillCell(False,x,y,cellList) #Dont do this yet, just flag
+						#self.addOrKillCell(False,x,y,cellList) #Dont do this yet, just flag
+						cellList[x][y].flaggedForKill = True
 					elif liveNeighbours > 3:
 						#Kill Cell
-						self.addOrKillCell(False,x,y,cellList)
+						#self.addOrKillCell(False,x,y,cellList)
+						cellList[x][y].flaggedForKill = True
 					else:
 						#Keep Cell 
-						self.addOrKillCell(True,x,y,cellList)
+						#self.addOrKillCell(True,x,y,cellList)
+						cellList[x][y].flaggedForKill = False
 
 
 				elif cellList[x][y].live is False:
 
 					if liveNeighbours == 3:
 						#Live Cell
-						self.addOrKillCell(True,x,y,cellList)
+						#self.addOrKillCell(True,x,y,cellList)
+						cellList[x][y].flaggedForKill = False
+					else:
+						cellList[x][y].flaggedForKill = True
+
+	#Kill cells flagged to be killed, ressuruect cells not flagged to be killed
+	def nextGeneration(self, cellList):
+		#gen++
+		for x in range(70):
+			for y in range(70):
+				if cellList[x][y].flaggedForKill is True:
+					self.addOrKillCell(False,x,y,cellList)
+				elif cellList[x][y].flaggedForKill is False:
+					self.addOrKillCell(True,x,y,cellList)
+
+		for x in range(70):
+			for y in range(70):
+				cellList[x][y].flaggedForKill = False
 
 
+
+	#Returns the number of live neighbours surrounding tile at (x,y)
 	def checkNeighbours(self,x,y,cellList):
 		liveNeighbours = 0
 
@@ -113,12 +137,13 @@ class game:
 
 
 
-
+#Class to represent one cell
 class Cell:
 	def __init__(self, live = True, x = 0, y = 0):
 		self.live = live
 		self.x = x
 		self.y = y
+		self.flaggedForKill = True
 
 
 
