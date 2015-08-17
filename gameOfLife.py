@@ -6,6 +6,8 @@ class game:
 
 		self.PAUSED = False
 
+		self.generationDuration = 100
+
 		self.frame = tk.Frame(bg="white")
 		self.frame.pack()
 
@@ -14,6 +16,9 @@ class game:
 
 		self.startB = tk.Button(self.frame, bg="grey", fg="white", text="Start", command=self.start)
 		self.startB.pack()
+
+		self.pauseB = tk.Button(self.frame, bg="grey", fg="white", text = "Pause", command = self.pause)
+		self.pauseB.pack()
 
 		self.root.mainloop()
 
@@ -33,11 +38,24 @@ class game:
 
 		self.gameLoop(self.cellList)
 
+	def pause(self):
+		print("Pause")
+
+		self.PAUSED = not self.PAUSED
+
+		if self.PAUSED is True:
+			self.root.after_cancel(self.job)
+		else:
+			self.generationDuration = 100
+			self.gameLoop(self.cellList)
+
+
+
 	def gameLoop(self, cellList):
 		self.checkLivingConditions(cellList)
 		self.nextGeneration(cellList)
 		self.paint(cellList)
-		self.root.after(5000, self.gameLoop, cellList)
+		self.job = self.root.after(self.generationDuration, self.gameLoop, cellList)
 
 	def paint(self,cellList):
 		self.canvas.delete(tk.ALL)
@@ -47,14 +65,17 @@ class game:
 				if cellList[x][y].live is True:
 					self.canvas.create_rectangle(x * 10, y * 10, x * 10 + 10, y * 10 + 10, fill = "red")
 
+	#canvas clicked with left mouse btn event
 	def canvasClicked(self,event): 
 		print("CLick: " + str(event.x) + ", " + str(event.y))
 		xTile = (event.x - (event.x % 10)) / 10
 		yTile = (event.y - (event.y % 10)) / 10
 
+		#bring cell to life where canvas is clicked
 		self.addOrKillCell(True,int(xTile), int(yTile),self.cellList)
 		self.paint(self.cellList)
 
+	#Function to add or kill cell
 	def addOrKillCell(self,live,x,y , cellList):
 		cellList[x][y].live = live
 
