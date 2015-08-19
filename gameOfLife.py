@@ -20,6 +20,9 @@ class game:
 		self.pauseB = tk.Button(self.frame, bg="grey", fg="white", text = "Pause", command = self.pause)
 		self.pauseB.pack()
 
+		self.genDurS = tk.Spinbox(self.frame, from_ = 1, to = 1000, repeatdelay = 10, repeatinterval = 10, command = self.genLengthChanged)
+		self.genDurS.pack()
+
 		self.root.mainloop()
 
 	def start(self):
@@ -34,7 +37,9 @@ class game:
 		self.cellList[20][22].live = True
 
 		self.canvas.bind("<Button-1>", self.canvasClicked)
+		self.canvas.bind("<B1-Motion>", self.canvasClicked)
 		
+		self.generationDuration = int(self.genDurS.get())
 
 		self.gameLoop(self.cellList)
 
@@ -46,8 +51,15 @@ class game:
 		if self.PAUSED is True:
 			self.root.after_cancel(self.job)
 		else:
-			self.generationDuration = 100
+			self.generationDuration = int(self.genDurS.get())
 			self.gameLoop(self.cellList)
+
+	def genLengthChanged(self):
+		print("speedChanged")
+		#self.root.after_cancel(self.job)
+		self.generationDuration = int(self.genDurS.get())
+		#self.gameLoop(self.cellList)
+
 
 
 
