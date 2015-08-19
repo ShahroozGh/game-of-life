@@ -7,6 +7,7 @@ class game:
 		self.PAUSED = False
 
 		self.generationDuration = 100
+		self.generation = 0
 
 		self.frame = tk.Frame(bg="white")
 		self.frame.pack()
@@ -22,6 +23,9 @@ class game:
 
 		self.genDurS = tk.Spinbox(self.frame, from_ = 1, to = 1000, repeatdelay = 10, repeatinterval = 10, command = self.genLengthChanged)
 		self.genDurS.pack()
+
+		self.generationL = tk.Label(self.frame, text = "0", font = ("Helvetica", 16))
+		self.generationL.pack()
 
 		self.root.mainloop()
 
@@ -64,6 +68,8 @@ class game:
 
 
 	def gameLoop(self, cellList):
+		self.generation += 1
+		self.generationL.config(text = str(self.generation))
 		self.checkLivingConditions(cellList)
 		self.nextGeneration(cellList)
 		self.paint(cellList)
