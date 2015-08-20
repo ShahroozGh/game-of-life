@@ -4,6 +4,7 @@ class game:
 	def __init__(self):
 		self.root = tk.Tk()
 
+		self.RUNNING = False
 		self.PAUSED = False
 
 		self.generationDuration = 100
@@ -16,47 +17,89 @@ class game:
 		self.canvas.pack()
 
 		self.startB = tk.Button(self.frame, bg="grey", fg="white", text="Start", command=self.start)
-		self.startB.pack()
+		self.startB.pack(side = tk.LEFT)
 
 		self.pauseB = tk.Button(self.frame, bg="grey", fg="white", text = "Pause", command = self.pause)
-		self.pauseB.pack()
+		self.pauseB.pack(side = tk.LEFT)
 
 		self.genDurS = tk.Spinbox(self.frame, from_ = 1, to = 1000, repeatdelay = 10, repeatinterval = 10, command = self.genLengthChanged)
-		self.genDurS.pack()
+		self.genDurS.pack(side = tk.LEFT)
 
 		self.generationL = tk.Label(self.frame, text = "0", font = ("Helvetica", 16))
-		self.generationL.pack()
+		self.generationL.pack(side = tk.LEFT)
+
+		#Bind button listners to respond to clicks on canvas
+		self.canvas.bind("<Button-1>", self.canvasClicked)
+		self.canvas.bind("<B1-Motion>", self.canvasClicked)
 
 		self.root.mainloop()
 
+		#Function called when start button is clicked, will start or reset
 	def start(self):
-		print("start")
-		self.cellList = [[Cell(False,x,y) for y in range(70)] for x in range(70)]
-
-		self.cellList[4][1].live = True
-		self.cellList[0][0].live = True
-
-		self.cellList[20][20].live = True
-		self.cellList[20][21].live = True
-		self.cellList[20][22].live = True
-
-		self.canvas.bind("<Button-1>", self.canvasClicked)
-		self.canvas.bind("<B1-Motion>", self.canvasClicked)
 		
-		self.generationDuration = int(self.genDurS.get())
+		if self.RUNNING is False:
 
-		self.gameLoop(self.cellList)
+			print("start")
+			self.RUNNING = True
+			self.PAUSED = False
+
+			#Initalize 2d list with dead cells
+			self.cellList = [[Cell(False,x,y) for y in range(70)] for x in range(70)]
+
+			self.cellList[4][1].live = True
+			self.cellList[0][0].live = True
+
+			self.cellList[20][20].live = True
+			self.cellList[20][21].live = True
+			self.cellList[20][22].live = True
+			
+			#Get generation duration from spinbox (in ms)
+			self.generationDuration = int(self.genDurS.get())
+
+			#Change button text
+			self.startB.config(text = "Reset")
+
+			#Start game loop
+			self.gameLoop(self.cellList)
+
+		else:
+
+			print("Reset")
+			self.RUNNING = False
+			self.PAUSED = False
+
+			#cancel queued after loop call (Stop gameLoop)
+			self.root.after_cancel(self.job)
+
+			#Initalize 2d list with dead cells
+			self.cellList = [[Cell(False,x,y) for y in range(70)] for x in range(70)]
+
+			#Paint empty board
+			self.paint(self.cellList)
+
+			#Reset generation count
+			self.generation = 0
+
+			#Update counter label
+			self.generationL.config(text = str(self.generation))
+
+			#Change button text
+			self.startB.config(text = "Start")
+
 
 	def pause(self):
-		print("Pause")
 
-		self.PAUSED = not self.PAUSED
+		if self.RUNNING is True:
+			
+			print("Pause")
 
-		if self.PAUSED is True:
-			self.root.after_cancel(self.job)
-		else:
-			self.generationDuration = int(self.genDurS.get())
-			self.gameLoop(self.cellList)
+			self.PAUSED = not self.PAUSED
+
+			if self.PAUSED is True:
+				self.root.after_cancel(self.job)
+			else:
+				self.generationDuration = int(self.genDurS.get())
+				self.gameLoop(self.cellList)
 
 	def genLengthChanged(self):
 		print("speedChanged")
@@ -82,6 +125,12 @@ class game:
 			for y in range(70):
 				if cellList[x][y].live is True:
 					self.canvas.create_rectangle(x * 10, y * 10, x * 10 + 10, y * 10 + 10, fill = "red")
+		
+		for x in range(70):
+			self.canvas.create_line(x*10,0,x*10,700, width = 1, fill = "grey")
+		for y in range(70):
+			self.canvas.create_line(0,y*10,700,y*10, width = 1, fill = "grey")
+		
 
 	#canvas clicked with left mouse btn event
 	def canvasClicked(self,event): 
@@ -178,7 +227,7 @@ class game:
 
 #Class to represent one cell
 class Cell:
-	def __init__(self, live = True, x = 0, y = 0):
+	def __init__(self, live = False, x = 0, y = 0):
 		self.live = live
 		self.x = x
 		self.y = y
