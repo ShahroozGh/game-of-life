@@ -7,6 +7,8 @@ class game:
 		self.RUNNING = False
 		self.PAUSED = False
 
+		self.SHOW_GRID = tk.BooleanVar()
+
 		self.generationDuration = 100
 		self.generation = 0
 
@@ -24,6 +26,9 @@ class game:
 
 		self.genDurS = tk.Spinbox(self.frame, from_ = 1, to = 1000, repeatdelay = 10, repeatinterval = 10, command = self.genLengthChanged)
 		self.genDurS.pack(side = tk.LEFT)
+
+		self.gridCB = tk.Checkbutton(self.frame, text = "Show Grid", variable = self.SHOW_GRID, onvalue = True, offvalue = False, command = self.gridCheckClicked)
+		self.gridCB.pack(side = tk.LEFT)
 
 		self.generationL = tk.Label(self.frame, text = "0", font = ("Helvetica", 16))
 		self.generationL.pack(side = tk.LEFT)
@@ -90,7 +95,7 @@ class game:
 	def pause(self):
 
 		if self.RUNNING is True:
-			
+
 			print("Pause")
 
 			self.PAUSED = not self.PAUSED
@@ -106,6 +111,9 @@ class game:
 		#self.root.after_cancel(self.job)
 		self.generationDuration = int(self.genDurS.get())
 		#self.gameLoop(self.cellList)
+
+	def gridCheckClicked(self):
+		print(self.SHOW_GRID.get())
 
 
 
@@ -126,10 +134,12 @@ class game:
 				if cellList[x][y].live is True:
 					self.canvas.create_rectangle(x * 10, y * 10, x * 10 + 10, y * 10 + 10, fill = "red")
 		
-		for x in range(70):
-			self.canvas.create_line(x*10,0,x*10,700, width = 1, fill = "grey")
-		for y in range(70):
-			self.canvas.create_line(0,y*10,700,y*10, width = 1, fill = "grey")
+		if self.SHOW_GRID.get() == 1:
+			#Paint gridlines
+			for x in range(70):
+				self.canvas.create_line(x*10,0,x*10,700, width = 1, fill = "grey")
+			for y in range(70):
+				self.canvas.create_line(0,y*10,700,y*10, width = 1, fill = "grey")
 		
 
 	#canvas clicked with left mouse btn event
